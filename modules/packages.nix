@@ -1,0 +1,39 @@
+{ pkgs }:
+
+with pkgs; [
+  cachix
+  clang
+  coreutils-prefixed
+  curl
+  devenv
+  diceware
+  du-dust
+  ffmpeg
+  fontconfig
+  git-crypt
+  git-lfs
+  gitAndTools.delta
+  gitAndTools.gh
+  gitAndTools.pass-git-helper
+  gitAndTools.pre-commit
+  htop
+  less
+  moreutils
+  nano
+  nix-du
+  nix-prefetch-git
+  nix-tree
+  nixfmt
+  nixpkgs-fmt
+  openssh
+  p7zip
+  pinentry_mac
+  plantuml
+  sass
+  autojump
+  shellcheck
+  tree
+  unzip
+  wget
+  xclip
+]

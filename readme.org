@@ -1,0 +1,97 @@
+#+TITLE: My nix-darwin/NixOS configuration
+
+Welcome to my nix-home.
+The goal for this repo is to delcaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
+
+I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take what you like.
+
+* Current MacOS setup
+| Shell    | zsh + starship   |
+| WM       | yabai            |
+| Terminal | Alacritty + tmux |
+| Editor   | Doom Emacs       |
+
+* Current Nixos setup
+| Shell    | zsh + starship   |
+| WM       | xmonad + xmobar  |
+| Terminal | Alacritty + tmux |
+| Editor   | Doom Emacs       |
+
+* Inspirations
+- https://github.com/cmacrae/config (nix-darwin)
+- https://github.com/hlissner/dotfiles/ (NixOS)
+- https://github.com/jwiegley/nix-config
+
+  and so many more
+
+* MacOS
+** Install
+
+**** Install Nix (with daemon)
+
+I think nix with daemon is recommended over the single user mode.
+
+~sh <(curl -L https://nixos.org/nix/install)~
+**** Turn on flake
+edit ~/etc/nix/nix.conf~
+
+~experimental-features = nix-command flakes~
+**** Install brew (sin)
+there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
+What is benefits of this ?
+we can install/uninstall applications using nix
+don't forget to do
+~brew analytics off~
+
+** [[https://github.com/LnL7/nix-darwin#updating][Update]]
+
+#+BEGIN_SRC shell
+nix flake update --recreate-lock-file
+#+END_SRC
+
+** build on macos?
+~nix build .#yuan-mac~
+*** switch ?
+~./result/sw/bin/darwin-rebuild switch --flake .~
+
+
+* Nixos
+~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
+
+#+begin_src
+  defcmd :gc do
+    desc "Garbage collect & optimize nix store"
+    opts "-a", "--all",    "GC both the user and system profiles"
+    opts "-s", "--system", "Only GC the system profile"
+    lambda do |_args|
+      if @@opts[:all] or @@opts[:system]
+        puts "Cleaning up your system profile..."
+        sh %w{nix-collect-garbage -d}, sudo: true
+        sh %w{nix-store --optimise}, sudo: true
+        # Clear out left-over secrets. The switch-to-configuration call below will
+        # regenerate them.
+        if File.exists?("/run/secrets/*")
+          sh %w{rm -rf /run/secrets/*}, sudo: true
+        end
+        # nix-collect-garbage is a Nix tool, not a NixOS tool. It won't delete old
+        # boot entries until you do a nixos-rebuild (which means we'll always have
+        # 2 boot entries at any time). Instead, we properly delete them by
+        # reloading the current environment.
+        sh %w{nix-env --delete-generations old --profile /nix/var/nix/profiles/system}, sudo: true
+        sh %w{/nix/var/nix/profiles/system/bin/switch-to-configuration switch}, sudo: true
+      end
+      if @@opts[:all] or not @@opts[:system]
+        puts "Cleaning up your user profile..."
+        sh %w{nix-collect-garbage -d}
+      end
+    end
+  end
+#+end_src
+* Caveats
+** ~fontconfig~ doesn't work for MacOS ?
+** Exclude Nix directory from Spotlight index
+** nix-darwin permission issue
+~sudo chown -R whoami:staff /nix/store~
+** sometime yabai cannot manage emacsclient window
+just do ~pkill yabai~ to restart yabai, that always fix the issue for me. I bind skhd key for ~pkill yabai~ and reload skhd
+sometime I found I have to ~sudo yabai --install-sa~ ~sudo yabai --load-sa~
