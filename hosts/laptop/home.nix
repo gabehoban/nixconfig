@@ -1,5 +1,8 @@
-{ config, pkgs, user, gitUser, gitEmail, ... }:
+{ config, pkgs, user, gitUser, gitEmail, gpgKey, ... }:
 
+let
+  fakepkg = name: pkgs.runCommand name {} "mkdir $out";
+in
 {
   home = {
     username = "${user}";
@@ -22,6 +25,9 @@
       git-crypt
       git-lfs
       jq
+      libu2f-host
+      yubikey-personalization
+      yubikey-manager
       less
       lsd
       moreutils
@@ -35,7 +41,6 @@
       tree
       wget
       # GUI Apps
-      firefox
       vscode
     ];
   };
@@ -44,6 +49,7 @@
     home-manager = {
       enable = true;
     };
+
     git = {
       enable = true;
       userName = "${gitUser}";
@@ -59,6 +65,7 @@
       diff-so-fancy.enable = true;
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
     };
+
     zsh = {
       enable = true;
       enableAutosuggestions = true;
@@ -80,10 +87,20 @@
         cat = "bat";
       };
     };
+
+    gpg = {
+      enable = true;
+      scdaemonSettings = {
+        disable-ccid = true;
+        reader-port = "Yubico YubiKey OTP+FIDO+CCID";
+      };
+    };
+
     fzf = {
       enable = true;
       enableZshIntegration = true;
     };
+
     tmux = {
       enable = true;
       baseIndex = 1;
@@ -146,6 +163,7 @@
         bind -n C-\\ if-shell "$is_vim" "send-keys C-\\" "select-pane -l"
       '';
     };
+
     lsd = {
       enable = true;
       settings = {
@@ -172,6 +190,7 @@
         symlink-arrow = "->";
       };
     };
+
     alacritty = {
       enable = true;
       settings = {
@@ -231,6 +250,7 @@
         };
       };
     };
+
     vscode = {
       enable = true;
         enableUpdateCheck = false;
@@ -250,8 +270,10 @@
           "workbench.iconTheme" = "material-icon-theme";
         };
     };
+
     firefox = {
       enable = true;
+      package = fakepkg "firefox";
       extensions = with pkgs.nur.repos.rycee.firefox-addons; [
         ublock-origin
         onepassword-password-manager
@@ -347,5 +369,5 @@
         };
       };
     };
-  }
+  };
 }
