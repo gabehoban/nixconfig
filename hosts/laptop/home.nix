@@ -1,7 +1,7 @@
 { config, pkgs, user, gitUser, gitEmail, gpgKey, ... }:
 
 let
-  fakepkg = name: pkgs.runCommand name {} "mkdir $out";
+  fakepkg = name: pkgs.runCommand name { } "mkdir $out";
 in
 {
   home = {
@@ -87,7 +87,7 @@ in
         cat = "bat";
       };
     };
-
+    
     gpg = {
       enable = true;
       scdaemonSettings = {
@@ -253,22 +253,22 @@ in
 
     vscode = {
       enable = true;
-        enableUpdateCheck = false;
-        extensions = with pkgs.vscode-extensions; [
-          jnoortheen.nix-ide
-          zhuangtongfa.material-theme
-          pkief.material-icon-theme
-        ];
-        userSettings = {
-          "editor.fontFamily" = "JetBrainsMono Nerd Font";
-          "editor.fontLigatures" = true;
-          "editor.fontSize" = 18;
-          "editor.lineHeight" = 30;
-          "window.zoomLevel" = 1;
-          "workbench.activityBar.visible" = true;
-          "workbench.colorTheme" = "One Dark Pro";
-          "workbench.iconTheme" = "material-icon-theme";
-        };
+      enableUpdateCheck = false;
+      extensions = with pkgs.vscode-extensions; [
+        jnoortheen.nix-ide
+        zhuangtongfa.material-theme
+        pkief.material-icon-theme
+      ];
+      userSettings = {
+        "editor.fontFamily" = "JetBrainsMono Nerd Font";
+        "editor.fontLigatures" = true;
+        "editor.fontSize" = 18;
+        "editor.lineHeight" = 30;
+        "window.zoomLevel" = 1;
+        "workbench.activityBar.visible" = true;
+        "workbench.colorTheme" = "One Dark Pro";
+        "workbench.iconTheme" = "material-icon-theme";
+      };
     };
 
     firefox = {
